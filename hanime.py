@@ -38,17 +38,16 @@ def info(url: str) -> dict:
     branduploads = None
     releasedate = None
     uploaddate = None
-    alternatetitles = []
     views = soup.find('div', attrs=['class', 'tv-views grey--text']).text
     censorship = soup.find('a', attrs=['class', 'hvpimbc-censorship-btn'])
     status = bool
-    if censorship.text == "CENSORED":
-        status = True
-    else:
-        status = False
-
-    for alttitle in soup.find_all('span', attrs=['class', 'mr-3 grey--text']):
-        alternatetitles.append(alttitle.text)
+    status = censorship.text == "CENSORED"
+    alternatetitles = [
+        alttitle.text
+        for alttitle in soup.find_all(
+            'span', attrs=['class', 'mr-3 grey--text']
+        )
+    ]
 
     for count, info in enumerate(info):
         if count == 0:
@@ -124,9 +123,4 @@ def tags(url: str) -> list:
     response = requests.get(url).text
     soup = BeautifulSoup(response, 'lxml')
     tags = soup.find('div', attrs=['class', 'hvpis-text grey--text text--lighten-1']).findChildren("a")
-    fulltags = []
-
-    for tag in tags:
-        fulltags.append(tag['href'].replace('/browse/tags/', ''))
-
-    return fulltags
+    return [tag['href'].replace('/browse/tags/', '') for tag in tags]
